@@ -1,0 +1,25 @@
+version: 0.2
+
+env:
+  git-credential-helper: yes
+    
+
+phases:
+ install:
+    runtime-versions:
+      nodejs: 14
+    commands:
+      - sudo yum install -y yum-utils
+      - sudo yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+      - sudo yum install -y gh
+ build:
+    commands:
+      - gh auth login
+      - gh release create v1.0.0 --title "Release Title" --notes "Release notes here"
+      #- git rev-parse --abbrev-ref HEAD
+      #- git config --global user.email "<>"
+      #- git config --global user.name "AWS CodeBuild"
+      #- git tag -a v1.0.0 -m "my initial release 1.0.0"
+      #- git push --tags
+      #- git checkout -b release/1.0.0
+      #- git push origin release/1.0.0
