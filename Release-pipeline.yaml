@@ -13,8 +13,11 @@ phases:
       - sudo yum install -y yum-utils
       - sudo yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
       - sudo yum install -y gh
+      - git config --global credential.helper 'cache --timeout=3600'
  pre_build:
     commands:
+      - echo "Authenticating with GitHub"
+      - echo $GITHUB_TOKEN | gh auth login --with-token
       - echo "Reading JSON file"
       - VERSION=$(jq -r '.version' release.json)
       - TITLE=$(jq -r '.title' release.json)
@@ -29,7 +32,6 @@ phases:
         fi
  build:
     commands:
-      - gh auth login
       - gh release create $VERSION --title "$TITLE" --notes "$NOTES"
       #- git rev-parse --abbrev-ref HEAD
       #- git config --global user.email "<>"
