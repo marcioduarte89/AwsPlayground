@@ -9,13 +9,28 @@ phases:
     runtime-versions:
       nodejs: 14
     commands:
+      - sudo yum install -y jq
       - sudo yum install -y yum-utils
       - sudo yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
       - sudo yum install -y gh
+ pre_build:
+    commands:
+      - echo "Reading JSON file"
+      - VERSION=$(jq -r '.version' release.json)
+      - TITLE=$(jq -r '.title' release.json)
+      - NOTES=$(jq -r '.notes' release.json)
+      - echo "Checking if tag $VERSION exists remotely"
+      - if ! git ls-remote --tags origin | grep -q "refs/tags/$VERSION"; then
+          echo "Tag $VERSION does not exist remotely. Pushing tag.";
+          git tag $VERSION;
+          git push origin $VERSION;
+        else
+          echo "Tag $VERSION already exists remotely.";
+        fi
  build:
     commands:
       - gh auth login
-      - gh release create v1.0.0 --title "Release Title" --notes "Release notes here"
+      - gh release create $VERSION --title "$TITLE" --notes "$NOTES"
       #- git rev-parse --abbrev-ref HEAD
       #- git config --global user.email "<>"
       #- git config --global user.name "AWS CodeBuild"
